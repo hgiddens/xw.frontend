@@ -1,8 +1,8 @@
-package xw.frontend.predef
+package xw
 
 import scala.{Nothing, inline}
 
-object Predef {
+package object frontend extends Imports {
   @inline
   def ??? : Nothing =
     scala.Predef.???
@@ -10,4 +10,9 @@ object Predef {
   @inline
   def implicitly[A](implicit ev: A): A =
     ev
+
+  object System {
+    @inline
+    def nanoTime(): Long = java.lang.System.nanoTime()
+  }
 }

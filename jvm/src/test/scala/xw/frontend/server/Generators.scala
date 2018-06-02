@@ -1,4 +1,5 @@
-package xw.frontend.server
+package xw.frontend
+package server
 
 import org.scalacheck.{Arbitrary, Shrink}
 import play.twirl.api.Html

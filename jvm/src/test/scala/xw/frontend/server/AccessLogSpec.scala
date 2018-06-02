@@ -1,4 +1,5 @@
-package xw.frontend.server
+package xw.frontend
+package server
 
 import java.net.InetAddress
 import scala.concurrent.duration._
