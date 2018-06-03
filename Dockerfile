@@ -6,7 +6,7 @@ COPY . /src
 
 WORKDIR /src
 
-RUN sbt -batch server/assembly
+RUN sbt -batch -DdevMode=false server/assembly
 
 FROM cloudscala/scala-graalvm:scala-2.12.6-sbt-1.1.5-graalvm-1.0.0-rc1 AS run
 
