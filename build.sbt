@@ -123,7 +123,8 @@ lazy val server = project.
   settings(compilerFlags).
   settings(
     name := "frontend-server",
-    assembly / assemblyJarName := "server.jar",
+    assembly / assemblyJarName := "frontend.jar",
+    assembly / test := (()),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http" % "10.1.1",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.1" % Test,

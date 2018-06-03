@@ -16,7 +16,7 @@ EXPOSE 8080
 
 WORKDIR /app
 
-COPY --from=build /src/server/target/scala-2.12/server.jar /app/server.jar
+COPY --from=build /src/server/target/scala-2.12/frontend.jar /app/frontend.jar
 
 RUN chmod o+rx /root && chmod -R o+rX /root/graalvm-1.0.0-rc1
 
@@ -27,4 +27,4 @@ CMD ["java", \
      "-XX:+UnlockExperimentalVMOptions", \
      "-XX:+UseCGroupMemoryLimitForHeap", \
      "-jar", \
-     "server.jar"]
+     "frontend.jar"]
