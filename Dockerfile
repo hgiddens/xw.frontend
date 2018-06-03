@@ -8,7 +8,7 @@ WORKDIR /src
 
 RUN sbt -batch -DdevMode=false server/assembly
 
-FROM cloudscala/scala-graalvm:scala-2.12.6-sbt-1.1.5-graalvm-1.0.0-rc1 AS run
+FROM debian:stable-slim AS run
 
 LABEL maintainer "hgiddens@gmail.com"
 
@@ -16,9 +16,11 @@ EXPOSE 8080
 
 WORKDIR /app
 
-COPY --from=build /src/server/target/scala-2.12/frontend.jar /app/frontend.jar
+ENV JAVA_HOME /opt/graalvm-1.0.0-rc1-jre
+ENV PATH $JAVA_HOME/bin:$PATH
 
-RUN chmod o+rx /root && chmod -R o+rX /root/graalvm-1.0.0-rc1
+COPY --from=build /src/server/target/scala-2.12/frontend.jar /app/frontend.jar
+COPY --from=build /root/graalvm-1.0.0-rc1/jre $JAVA_HOME
 
 USER nobody
 
