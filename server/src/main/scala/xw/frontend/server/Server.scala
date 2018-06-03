@@ -9,6 +9,7 @@ import akka.stream.ActorMaterializer
 import org.log4s.getLogger
 import rocks.heikoseeberger.accessus.Accessus.RouteOps
 
+import xw.frontend.resources.config.ResourceConfig
 import xw.frontend.server.AccessLog.accessLog
 
 object Server {
@@ -19,7 +20,8 @@ object Server {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-    val route = Routes.root.withTimestampedAccessLog(accessLog)
+    val resourceConfig = ResourceConfig()
+    val route = Routes.root(resourceConfig).withTimestampedAccessLog(accessLog)
 
     Http().bindAndHandle(route, "0.0.0.0", 8080).foreach { binding ⇒
       log.info(s"Server started up on ${binding.localAddress}")

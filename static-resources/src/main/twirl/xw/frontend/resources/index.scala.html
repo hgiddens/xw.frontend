@@ -1,8 +1,12 @@
-@()
+@import xw.frontend.resources.config.ResourceConfig
+@(config: ResourceConfig)
 <!DOCTYPE html>
 <html>
   <head>
-    <title>xw</title>
+    <title>@config.title</title>
+    @for(javascript <- config.javascripts) {
+      <script defer src="@{javascript.mkString("/", "/", "")}"></script>
+    }
   </head>
   <body>
     <p>xw</p>
