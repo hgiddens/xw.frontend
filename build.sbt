@@ -40,18 +40,12 @@ def compilerFlags: Seq[Setting[_]] = {
     "-Ypartial-unification",
   )
 
-  val tls = lbs diff Seq(
-    "-Yno-imports",
-    "-Yno-predef",
-    "-Ywarn-unused:imports",
-  ) ++ Seq(
+  val tls = lbs ++ Seq(
     "-Xlint:strict-unsealed-patmat",
     "-Xstrict-patmat-analysis",
     "-Yinduction-heuristics",
     "-Ykind-polymorphism",
     "-Yliteral-types",
-    "-Ypredef", "xw.frontend.predef.Predef._",
-    "-Ysysdef", "",
   )
 
   val test = Seq(
@@ -111,8 +105,8 @@ lazy val resources = project.
   settings(compilerFlags).
   settings(
     name := "frontend-resources",
+    TwirlKeys.templateImports += "xw.frontend._",
     Compile / compile / scalacOptions --= Seq(
-      "-Yno-imports",
       "-Ywarn-unused:imports",
     )
   )

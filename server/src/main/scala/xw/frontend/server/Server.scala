@@ -1,4 +1,5 @@
-package xw.frontend.server
+package xw.frontend
+package server
 
 import scala.concurrent.ExecutionContext
 

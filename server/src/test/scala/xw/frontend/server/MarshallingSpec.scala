@@ -1,4 +1,5 @@
-package xw.frontend.server
+package xw.frontend
+package server
 
 import akka.http.scaladsl.model.MediaTypes
 import akka.http.scaladsl.server.Directives.complete
