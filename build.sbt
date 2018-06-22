@@ -7,7 +7,7 @@ ThisBuild / scalaVersion := "2.12.6"
 val devMode = sys.props.get("devMode").getOrElse("true").toBoolean
 
 def compilerFlags: Seq[Setting[_]] = {
-  val lbs = Seq(
+  val common = Seq(
     "-deprecation",
     "-encoding", "utf-8",
     "-explaintypes",
@@ -42,14 +42,6 @@ def compilerFlags: Seq[Setting[_]] = {
     "-Ypartial-unification",
   )
 
-  val tls = lbs ++ Seq(
-    "-Xlint:strict-unsealed-patmat",
-    "-Xstrict-patmat-analysis",
-    "-Yinduction-heuristics",
-    "-Ykind-polymorphism",
-    "-Yliteral-types",
-  )
-
   val test = Seq(
     "-Yrangepos",
   )
@@ -75,18 +67,12 @@ def compilerFlags: Seq[Setting[_]] = {
   )
 
   Seq(
-    scalacOptions := (if (scalaOrganization.value == "org.typelevel") tls else lbs),
+    scalacOptions := common,
     Test / scalacOptions ++= test,
     Compile / compile / scalacOptions ++= compileOnly,
     Test / compile / scalacOptions ++= compileOnly,
   )
 }
-
-// Scala.js can't be used with TLS, so only use it in pure Scala contexts.
-val typelevelScala = Seq(
-  scalaVersion := "2.12.4-bin-typelevel-4",
-  scalaOrganization := "org.typelevel",
-)
 
 disablePlugins(RevolverPlugin)
 
@@ -105,7 +91,6 @@ lazy val `static-resources` = project.
   disablePlugins(RevolverPlugin).
   enablePlugins(SbtTwirl).
   dependsOn(predefJVM).
-  settings(typelevelScala).
   settings(compilerFlags).
   settings(
     name := "frontend-resources",
@@ -132,7 +117,6 @@ lazy val client = project.
 
 lazy val server = project.
   dependsOn(`static-resources`).
-  settings(typelevelScala).
   settings(compilerFlags).
   settings(
     name := "frontend-server",
