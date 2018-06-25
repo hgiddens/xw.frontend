@@ -6,7 +6,7 @@ COPY . /src
 
 WORKDIR /src
 
-RUN sbt -batch -DdevMode=false server/assembly
+RUN sbt -batch server/assembly
 
 FROM debian:stable-slim AS run
 

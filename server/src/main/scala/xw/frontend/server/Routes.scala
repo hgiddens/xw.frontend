@@ -16,12 +16,7 @@ object Routes {
     } ~ static(config)
 
   private def static(config: ResourceConfig): Route =
-    pathPrefix(config.staticRoot) {
-      path(config.clientDeps) {
-        getFromResource(config.clientDeps)
-      } ~ path(config.client) {
-        getFromResource(config.client)
-      }
+    pathPrefix(config.staticRoot / Remaining) { file ⇒
+      getFromResource(BuildInfo.webPackagePrefix + file)
     }
-
 }

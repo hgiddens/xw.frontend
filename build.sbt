@@ -4,8 +4,6 @@ ThisBuild / version := "0.0.1-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.12.6"
 
-val devMode = sys.props.get("devMode").getOrElse("true").toBoolean
-
 def compilerFlags: Seq[Setting[_]] = {
   val common = Seq(
     "-deprecation",
@@ -78,15 +76,24 @@ disablePlugins(RevolverPlugin)
 
 ThisBuild / scalafmtOnCompile := true
 
+val webPackagePrefix = "web/"
+
 lazy val predef = crossProject.
   disablePlugins(RevolverPlugin).
+  enablePlugins(BuildInfoPlugin).
   settings(compilerFlags).
   settings(
-    name := "frontend-predef"
+    name := "frontend-predef",
+
+    buildInfoPackage := "xw.frontend",
+    buildInfoKeys := Seq(
+      "webPackagePrefix" → webPackagePrefix,
+    ),
   )
 lazy val predefJS = predef.js
 lazy val predefJVM = predef.jvm
 
+// This mostly exists to isolate the disabling of compilation flags.
 lazy val `static-resources` = project.
   disablePlugins(RevolverPlugin).
   enablePlugins(SbtTwirl).
@@ -98,24 +105,21 @@ lazy val `static-resources` = project.
     Compile / compile / scalacOptions --= Seq(
       "-Ywarn-unused:imports",
     ),
+    libraryDependencies += "com.vmunier" %% "scalajs-scripts" % "1.1.2",
   )
 
 lazy val client = project.
   disablePlugins(RevolverPlugin).
-  enablePlugins(ScalaJSPlugin).
+  enablePlugins(ScalaJSPlugin, ScalaJSWeb).
   dependsOn(predefJS).
   settings(
     name := "frontend-client",
     scalaJSUseMainModuleInitializer := true,
-
-    // Consistent naming of generated JS
-    artifactPath in Compile in fastOptJS :=
-      (crossTarget in fastOptJS).value / ((moduleName in fastOptJS).value + ".js"),
-    artifactPath in Compile in fullOptJS :=
-      (crossTarget in fullOptJS).value / ((moduleName in fullOptJS).value + ".js"),
+    emitSourceMaps in fullOptJS := false,
   )
 
 lazy val server = project.
+  enablePlugins(SbtWeb).
   dependsOn(`static-resources`).
   settings(compilerFlags).
   settings(
@@ -135,8 +139,10 @@ lazy val server = project.
     assembly / assemblyJarName := "frontend.jar",
     assembly / test := (()),
 
-    // Depend on the client stuff
-    Compile / resources += (client / Compile / packageMinifiedJSDependencies).value,
-    if (devMode) Compile / resources += (client / Compile / fastOptJS).value.data
-    else Compile / resources += (client / Compile / fullOptJS).value.data,
+    scalaJSProjects := Seq(client),
+    WebKeys.packagePrefix in Assets := webPackagePrefix,
+    pipelineStages in Assets := Seq(scalaJSPipeline),
+    managedClasspath in Runtime += (packageBin in Assets).value,
+    managedClasspath in Test += (packageBin in Assets).value,
   )
+

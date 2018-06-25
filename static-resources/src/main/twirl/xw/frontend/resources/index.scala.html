@@ -4,8 +4,13 @@
 <html>
   <head>
     <title>@config.title</title>
-    @for(javascript <- config.javascripts) {
-      <script defer src="@{javascript.mkString("/", "/", "")}"></script>
+    @defining(config.staticRoot) { root =>
+      @scalajs.html.scripts(
+        "frontend-client",
+        name ⇒ s"/$root/$name",
+        name ⇒ getClass.getResource(s"/${BuildInfo.webPackagePrefix}$name") != null,
+        Html("defer")
+      )
     }
   </head>
   <body>
