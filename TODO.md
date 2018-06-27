@@ -7,7 +7,6 @@
 - test that the sourcemaps work (how do they work lol)
 - authentication
 - coordinated shutdown
-- logging configuration
 
 ## Distant future
 
