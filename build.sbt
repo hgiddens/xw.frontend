@@ -78,26 +78,26 @@ ThisBuild / scalafmtOnCompile := true
 
 val webPackagePrefix = "web/"
 
-lazy val predef = crossProject.
+lazy val common = crossProject.
   disablePlugins(RevolverPlugin).
   enablePlugins(BuildInfoPlugin).
   settings(compilerFlags).
   settings(
-    name := "frontend-predef",
+    name := "frontend-common",
 
     buildInfoPackage := "xw.frontend",
     buildInfoKeys := Seq(
       "webPackagePrefix" → webPackagePrefix,
     ),
   )
-lazy val predefJS = predef.js
-lazy val predefJVM = predef.jvm
+lazy val commonJS = common.js
+lazy val commonJVM = common.jvm
 
 // This mostly exists to isolate the disabling of compilation flags.
 lazy val `static-resources` = project.
   disablePlugins(RevolverPlugin).
   enablePlugins(SbtTwirl).
-  dependsOn(predefJVM).
+  dependsOn(commonJVM).
   settings(compilerFlags).
   settings(
     name := "frontend-resources",
@@ -111,7 +111,8 @@ lazy val `static-resources` = project.
 lazy val client = project.
   disablePlugins(RevolverPlugin).
   enablePlugins(ScalaJSPlugin, ScalaJSWeb).
-  dependsOn(predefJS).
+  dependsOn(commonJS).
+  settings(compilerFlags).
   settings(
     name := "frontend-client",
     scalaJSUseMainModuleInitializer := true,
