@@ -6,7 +6,6 @@
 - compression
 - test that the sourcemaps work (how do they work lol)
 - authentication
-- coordinated shutdown
 
 ## Distant future
 
