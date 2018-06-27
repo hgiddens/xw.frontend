@@ -1,5 +1,7 @@
 # XW: Frontend
 
+[![Build Status](https://travis-ci.com/hgiddens/xw.frontend.svg?branch=master)](https://travis-ci.com/hgiddens/xw.frontend)
+
 This is intended to be the API frontend and web app of a collaborative
 sketching service that allows crosswords to be completed collaboratively.
 
