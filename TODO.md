@@ -4,7 +4,6 @@
 - git SHA based cache headers for static content – there's a sbt-web plugin
   for this, or something similar
 - compression
-- bitbucket pipeline
 - test that the sourcemaps work (how do they work lol)
 - authentication
 - coordinated shutdown
