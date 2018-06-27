@@ -132,6 +132,8 @@ lazy val server = project.
       "com.typesafe.akka" %% "akka-http" % "10.1.3",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
       "com.typesafe.akka" %% "akka-stream" % "2.5.13",
+      "eu.timepit" %% "refined" % "0.9.0",
+      "eu.timepit" %% "refined-pureconfig" % "0.9.0",
       "org.log4s" %% "log4s" % "1.6.1",
       "org.specs2" %% "specs2-core" % "4.2.0" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.2.0" % Test,

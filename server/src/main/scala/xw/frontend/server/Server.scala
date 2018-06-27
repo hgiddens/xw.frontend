@@ -8,6 +8,10 @@ import scala.sys
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import eu.timepit.refined.W
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.numeric.Interval
+import eu.timepit.refined.pureconfig._
 import org.log4s.getLogger
 import pureconfig.loadConfig
 import pureconfig.error.ConfigReaderFailures
@@ -17,7 +21,12 @@ import xw.frontend.resources.config.ResourceConfig
 import xw.frontend.server.AccessLog.accessLog
 
 object Server {
-  final private case class Config(shutdownDeadline: FiniteDuration)
+  private type PortNumber = Interval.Closed[W.`1`.T, W.`65535`.T]
+  final private case class Config(
+      interface: String,
+      port: Int Refined PortNumber,
+      shutdownDeadline: FiniteDuration
+  )
 
   private[this] val log = getLogger
 
@@ -29,7 +38,7 @@ object Server {
     val resourceConfig = ResourceConfig()
     val route = Routes.root(resourceConfig).withTimestampedAccessLog(accessLog)
 
-    Http().bindAndHandle(route, "0.0.0.0", 8080).foreach { binding ⇒
+    Http().bindAndHandle(route, config.interface, config.port.value).foreach { binding ⇒
       sys.addShutdownHook {
         log.debug("Termination signal received")
         // Heroku imposes a 30 second timeout; don't bet the farm.
