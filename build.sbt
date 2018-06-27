@@ -117,6 +117,31 @@ lazy val client = project.
     name := "frontend-client",
     scalaJSUseMainModuleInitializer := true,
     emitSourceMaps in fullOptJS := false,
+
+    libraryDependencies ++= Seq(
+      "com.github.japgolly.scalajs-react" %%% "core" % "1.2.0",
+      "com.pepegar" %%% "hammock-circe" % "0.8.4",
+      "com.pepegar" %%% "hammock-core" % "0.8.4",
+    ),
+    // Bundler doesn't support source maps, so use the old approach.
+    jsDependencies ++= Seq(
+      "org.webjars.npm" % "react" % "16.2.0"
+        / "umd/react.development.js"
+        minified "umd/react.production.min.js"
+        commonJSName "React",
+
+      "org.webjars.npm" % "react-dom" % "16.2.0"
+        / "umd/react-dom.development.js"
+        minified  "umd/react-dom.production.min.js"
+        dependsOn "umd/react.development.js"
+        commonJSName "ReactDOM",
+
+      "org.webjars.npm" % "react-dom" % "16.2.0"
+        / "umd/react-dom-server.browser.development.js"
+        minified  "umd/react-dom-server.browser.production.min.js"
+        dependsOn "umd/react-dom.development.js"
+        commonJSName "ReactDOMServer"
+    )
   )
 
 lazy val server = project.
@@ -130,6 +155,7 @@ lazy val server = project.
       "com.typesafe.akka" %% "akka-http" % "10.1.1",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.1" % Test,
       "com.typesafe.akka" %% "akka-stream" % "2.5.12",
+      "de.heikoseeberger" %% "akka-http-circe" % "1.21.0",
       "org.log4s" %% "log4s" % "1.6.1",
       "org.slf4j" % "slf4j-simple" % "1.7.25",
       "org.specs2" %% "specs2-core" % "4.2.0" % Test,

@@ -4,6 +4,7 @@ trait Imports {
   // Primitives
   final type Any = scala.Any
   final type Byte = scala.Byte
+  final type Int = scala.Int
   final type Long = scala.Long
   final type Unit = scala.Unit
 

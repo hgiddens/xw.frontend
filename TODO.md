@@ -17,3 +17,10 @@
 ## Things to remember
 
 - when there is an API, it would like OpenAPI documentation.
+
+## Magical counter spike
+
+1. Web page displays a counter.
+2. Web page displays a button.
+3. When you press the button the number goes up locally.
+4. This is synced across all browsers.
