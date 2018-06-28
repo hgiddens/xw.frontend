@@ -1,3 +1,6 @@
+import com.typesafe.sbt.web.PathMapping
+import com.typesafe.sbt.web.pipeline.Pipeline
+
 ThisBuild / organization := "xw"
 name := "frontend"
 ThisBuild / version := "0.0.1-SNAPSHOT"
@@ -76,7 +79,8 @@ disablePlugins(RevolverPlugin)
 
 ThisBuild / scalafmtOnCompile := true
 
-val webPackagePrefix = "web/"
+val digestIndex = "digest-index.json"
+val webPackageDirectory = "web"
 
 lazy val common = crossProject.
   disablePlugins(RevolverPlugin).
@@ -87,7 +91,8 @@ lazy val common = crossProject.
 
     buildInfoPackage := "xw.frontend",
     buildInfoKeys := Seq(
-      "webPackagePrefix" → webPackagePrefix,
+      "digestIndex" → digestIndex,
+      "webPackageDirectory" → webPackageDirectory,
     ),
   )
 lazy val commonJS = common.js
@@ -105,7 +110,12 @@ lazy val `static-resources` = project.
     Compile / compile / scalacOptions --= Seq(
       "-Ywarn-unused:imports",
     ),
-    libraryDependencies += "com.vmunier" %% "scalajs-scripts" % "1.1.2",
+    libraryDependencies ++= Seq(
+      "io.circe" %% "circe-parser" % "0.9.3",
+      "com.vmunier" %% "scalajs-scripts" % "1.1.2",
+      "org.specs2" %% "specs2-core" % "4.2.0" % Test,
+      "org.typelevel" %% "cats-core" % "1.1.0",
+    ),
   )
 
 lazy val client = project.
@@ -118,6 +128,18 @@ lazy val client = project.
     scalaJSUseMainModuleInitializer := true,
     emitSourceMaps in fullOptJS := false,
   )
+
+// For some reason, the paths of the digest files have an extra slash
+// prepended to them. This isn't canonicalised by either the ZIP reading or
+// getResource, and it's much nicer to fix them up here than it is to write
+// tests to work around it.
+val fixDigestPaths = taskKey[Pipeline.Stage]("Fix sbt-digest paths")
+ThisBuild / fixDigestPaths := { mappings: Seq[PathMapping] ⇒
+  mappings.map { case mapping @ (source, destination) ⇒
+    if (destination.startsWith("/")) (source, destination.tail)
+    else mapping
+  }
+}
 
 lazy val server = project.
   enablePlugins(SbtWeb).
@@ -144,8 +166,9 @@ lazy val server = project.
     assembly / test := (()),
 
     scalaJSProjects := Seq(client),
-    WebKeys.packagePrefix in Assets := webPackagePrefix,
-    pipelineStages in Assets := Seq(scalaJSPipeline),
+    WebKeys.packagePrefix in Assets := webPackageDirectory + "/",
+    DigestKeys.indexPath := Some(digestIndex),
+    pipelineStages in Assets := Seq(scalaJSPipeline, digest, gzip, fixDigestPaths),
     managedClasspath in Runtime += (packageBin in Assets).value,
     managedClasspath in Test += (packageBin in Assets).value,
   )
