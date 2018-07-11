@@ -38,6 +38,12 @@ a development server (listening on all interfaces on 8080), use:
 Running `server/reStart` again will rebuild everything necessary and restart
 the server.
 
+### Prerequisites
+
+* Java 8+
+* SBT
+* Node
+
 ### Testing
 
 This is done via SBT also; run tests via:
