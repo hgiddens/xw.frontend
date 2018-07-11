@@ -19,6 +19,7 @@ trait AssetLookup {
 }
 
 final class ResourceConfig(digestFor: String ⇒ String) extends AssetLookup { self ⇒
+
   /** Asset lookup compatible with the sbt-digest plugin. */
   object digest extends AssetLookup {
     def asset(name: String): String =
