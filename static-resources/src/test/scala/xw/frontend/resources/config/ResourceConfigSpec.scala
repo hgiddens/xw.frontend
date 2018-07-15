@@ -11,7 +11,7 @@ object ResourceConfigSpec extends Specification {
   val nonDigest = s"$dir/non-digest-file"
   val absent = s"$dir/absent-file"
 
-  "digestFor" should {
+  "digestFrom" should {
     "extract the digest from the simple case" in {
       val config = ResourceConfig()
       config.digestFrom(example) must beSome(md5)
