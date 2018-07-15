@@ -31,44 +31,39 @@ object ResourceConfigSpec extends Specification {
   "digest.asset" should {
     "find the base path for non-digest assets" in {
       val config = ResourceConfig()
-      config.digest.asset(nonDigest) must_=== s"/${config.staticRoot}/$nonDigest"
+      config.publicAssetPath(nonDigest) must_=== s"/${config.staticRoot}/$nonDigest"
     }
 
     "find the base path for missing assets" in {
       val config = ResourceConfig()
-      config.digest.asset(absent) must_=== s"/${config.staticRoot}/$absent"
+      config.publicAssetPath(absent) must_=== s"/${config.staticRoot}/$absent"
     }
 
     "find the prefix path for digest assets" in {
       val config = ResourceConfig()
-      config.digest.asset(s"$dir/$base") must_=== s"/${config.staticRoot}/$example"
+      config.publicAssetPath(s"$dir/$base") must_=== s"/${config.staticRoot}/$example"
     }
 
     "find the prefix path for digest assets at the root" in {
       val config = ResourceConfig()
-      config.digest.asset(s"$dir-$base") must_=== s"/${config.staticRoot}/$md5-$dir-$base"
+      config.publicAssetPath(s"$dir-$base") must_=== s"/${config.staticRoot}/$md5-$dir-$base"
     }
   }
 
   "digest.exist" should {
-    "be true for non-digest assets" in {
-      val config = ResourceConfig()
-      config.digest.exists(nonDigest) must beTrue
-    }
-
     "be false for missing assets" in {
       val config = ResourceConfig()
-      config.digest.exists(absent) must beFalse
+      config.assetExists(absent) must beFalse
     }
 
     "be true for digest assets" in {
       val config = ResourceConfig()
-      config.digest.exists(s"$dir/$base") must beTrue
+      config.assetExists(s"$dir/$base") must beTrue
     }
 
     "be true for digest assets at the root" in {
       val config = ResourceConfig()
-      config.digest.exists(s"$dir-$base") must beTrue
+      config.assetExists(s"$dir-$base") must beTrue
     }
   }
 }

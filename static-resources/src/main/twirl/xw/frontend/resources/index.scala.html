@@ -5,7 +5,7 @@
   <head>
     <title>@config.title</title>
     @defining(config.staticRoot) { root =>
-      @scalajs.html.scripts("frontend-client", config.digest.asset, config.digest.exists, Html("defer"))
+      @scalajs.html.scripts("frontend-client", config.publicAssetPath, config.assetExists, Html("defer"))
     }
   </head>
   <body>

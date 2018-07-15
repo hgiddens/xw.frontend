@@ -8,35 +8,25 @@ import scala.util.Try
 import cats.implicits._
 import io.circe.parser.decode
 
-/** Asset lookup methods compatible with the ScalaJS script library lookup. */
-trait AssetLookup {
+/**
+  * Resource configuration used by the Twirl templates.
+  *
+  * Includes support for looking up asset paths that include digests from paths that don't include
+  * the digests. It is assumed that digests are used for <i>all</i> static assets.
+  */
+final class ResourceConfig(digestFor: String ⇒ Option[String]) { self ⇒
 
   /** The public name of an asset. */
-  def asset(name: String): String
-
-  /** Whether an asset exists with a given name. */
-  def exists(name: String): Boolean
-}
-
-final class ResourceConfig(digestFor: String ⇒ String) extends AssetLookup { self ⇒
-
-  /** Asset lookup compatible with the sbt-digest plugin. */
-  object digest extends AssetLookup {
-    def asset(name: String): String =
-      self.asset(digestFor(name))
-
-    def exists(name: String): Boolean =
-      self.exists(digestFor(name))
+  def publicAssetPath(name: String): String = {
+    val withDigest = digestFor(name).getOrElse(name)
+    s"/$staticRoot/$withDigest"
   }
 
-  def asset(name: String): String =
-    s"/$staticRoot/$name"
+  /** Whether an asset exists with a given name. */
+  def assetExists(name: String): Boolean =
+    digestFor(name).isDefined
 
-  def exists(name: String): Boolean =
-    getClass.getResource(s"/${BuildInfo.webPackageDirectory}/$name") != null
-
-  /** If the path contains a digest, returns it. */
-  // TODO: load from index also
+  /** If the file component of the path contains a digest, returns it. */
   def digestFrom(path: String): Option[String] = {
     val file = new File(path)
     val md5Length = 32
@@ -63,7 +53,7 @@ object ResourceConfig {
           val stripped = if (v.startsWith("/")) v.substring(1) else v
           (k, stripped)
       }
-    } yield new ResourceConfig(name ⇒ fixedMap.getOrElse(name, name))
+    } yield new ResourceConfig(fixedMap.get)
 
     result.get
   }
