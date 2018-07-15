@@ -3,6 +3,7 @@
 - favicon
 - authentication
 - digest digests too much – stop it eating source maps somehow?
+- scalamu mutation testing(?)
 
 ## Distant future
 
