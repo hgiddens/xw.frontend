@@ -8,12 +8,7 @@ import scala.util.Try
 import cats.implicits._
 import io.circe.parser.decode
 
-/**
-  * Resource configuration used by the Twirl templates.
-  *
-  * Includes support for looking up asset paths that include digests from paths that don't include
-  * the digests. It is assumed that digests are used for <i>all</i> static assets.
-  */
+/** Resource configuration used by the Twirl templates. */
 final class ResourceConfig(digestFor: String ⇒ Option[String]) { self ⇒
 
   /** The public name of an asset. */
@@ -41,20 +36,24 @@ final class ResourceConfig(digestFor: String ⇒ Option[String]) { self ⇒
 }
 object ResourceConfig {
 
-  // TODO: Blocking/errors
-  def apply(): ResourceConfig = {
-    val path = s"/${BuildInfo.webPackageDirectory}/${BuildInfo.digestIndex}"
-    val result = for {
-      resource ← Option(getClass.getResource(path))
-      asString ← Try(Source.fromURL(resource).mkString.trim).toOption
-      asMap ← decode[Map[String, String]](asString).toOption
-      fixedMap = asMap.map {
-        case (k, v) ⇒
-          val stripped = if (v.startsWith("/")) v.substring(1) else v
-          (k, stripped)
-      }
-    } yield new ResourceConfig(fixedMap.get)
+  private def dropSlash(s: String): String =
+    if (s.startsWith("/")) s.substring(1)
+    else s
 
-    result.get
+  /**
+    * Creates a ResourceConfig instance that looks up assets via the digest index.
+    *
+    * Assets are looked up using paths that include a digest. Lookup of assets that don't include
+    * their digest in their file name is not supported; it is assumed that digests are used for
+    * <i>all</i> assets.
+    */
+  def apply(): Either[String, ResourceConfig] = {
+    val path = s"/${BuildInfo.webPackageDirectory}/${BuildInfo.digestIndex}"
+    for {
+      resource ← Option(getClass.getResource(path)).toRight(s"Missing digest index $path")
+      asString ← Try(Source.fromURL(resource).mkString.trim).toEither.leftMap(_.getMessage)
+      asMap ← decode[Map[String, String]](asString).left.map(_.getMessage)
+      fixedMap = asMap.mapValues(dropSlash).view.force
+    } yield new ResourceConfig(fixedMap.get)
   }
 }

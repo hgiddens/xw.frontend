@@ -9,6 +9,7 @@ trait Imports {
   final type Byte = scala.Byte
   final type Int = scala.Int
   final type Long = scala.Long
+  final type Nothing = scala.Nothing
   final type Unit = scala.Unit
 
   // Strings
@@ -19,6 +20,11 @@ trait Imports {
   // Collections
   final type Array[A] = scala.Array[A]
   final val Array: scala.Array.type = scala.Array
+
+  final type Either[A, B] = scala.util.Either[A, B]
+  final val Either: scala.util.Either.type = scala.util.Either
+  final val Left: scala.util.Left.type = scala.util.Left
+  final val Right: scala.util.Right.type = scala.util.Right
 
   final type List[A] = immutable.List[A]
   final val List: immutable.List.type = immutable.List

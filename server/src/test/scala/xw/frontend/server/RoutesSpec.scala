@@ -15,7 +15,7 @@ object RoutesSpec extends Specification with Specs2RouteTest {
   "client" should {
     trait ClientScope extends Scope {
       final val clientJS = "frontend-client-opt.js"
-      private val config = ResourceConfig()
+      private val Right(config) = ResourceConfig()
       final val route = Routes.root(config)
       final val request = Get(s"/${config.staticRoot}/$clientJS")
     }

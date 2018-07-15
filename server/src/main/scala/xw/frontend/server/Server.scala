@@ -30,12 +30,11 @@ object Server {
 
   private[this] val log = getLogger
 
-  private def withConfig(config: Config): Unit = {
+  private def withConfig(config: Config, resourceConfig: ResourceConfig): Unit = {
     implicit val actorSystem: ActorSystem = ActorSystem("frontend-server")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-    val resourceConfig = ResourceConfig()
     val route = Routes.root(resourceConfig).withTimestampedAccessLog(accessLog)
 
     Http().bindAndHandle(route, config.interface, config.port.value).foreach { binding ⇒
@@ -57,7 +56,7 @@ object Server {
     }
   }
 
-  private def onConfigError(failures: ConfigReaderFailures): Unit = {
+  private def onConfigError(failures: ConfigReaderFailures): Nothing = {
     failures.toList.foreach { failure ⇒
       val location = failure.location.map(location ⇒ " " + location.description).getOrElse("")
       log.error(s"${failure.description}$location")
@@ -65,6 +64,14 @@ object Server {
     sys.exit(1)
   }
 
-  def main(args: Array[String]): Unit =
-    loadConfig[Config]("server").fold(onConfigError, withConfig)
+  private def onError(message: String): Nothing = {
+    log.error(message)
+    sys.exit(1)
+  }
+
+  def main(args: Array[String]): Unit = {
+    val config = loadConfig[Config]("server").left.map(onConfigError).merge
+    val resourceConfig = ResourceConfig().left.map(onError).merge
+    withConfig(config, resourceConfig)
+  }
 }

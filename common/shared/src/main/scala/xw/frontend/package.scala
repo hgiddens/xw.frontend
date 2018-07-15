@@ -1,6 +1,6 @@
 package xw
 
-import scala.{Nothing, inline}
+import scala.inline
 
 /**
   * Logically a predef, but implemented as a top level package object for compatibility with
