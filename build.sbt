@@ -75,6 +75,11 @@ def compilerFlags: Seq[Setting[_]] = {
   )
 }
 
+ThisBuild / dependencyOverrides ++= Seq(
+  // circe-core 0.9.3 depends on cats-core 1.0.1
+  "org.typelevel" %% "cats-core" % "1.1.0",
+)
+
 disablePlugins(RevolverPlugin)
 
 ThisBuild / scalafmtOnCompile := true
