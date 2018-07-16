@@ -19,6 +19,7 @@ import rocks.heikoseeberger.accessus.Accessus.RouteOps
 
 import xw.frontend.resources.config.ResourceConfig
 import xw.frontend.server.AccessLog.accessLog
+import xw.frontend.server.documents.{Document, DocumentStore}
 
 object Server {
   private type PortNumber = Interval.Closed[W.`1`.T, W.`65535`.T]
@@ -35,7 +36,13 @@ object Server {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-    val route = Routes.root(resourceConfig).withTimestampedAccessLog(accessLog)
+    val documentStore = new DocumentStore {
+      def documents: Vector[Document] = Vector.empty
+    }
+
+    val route = Routes
+      .root(resourceConfig, documentStore)
+      .withTimestampedAccessLog(accessLog)
 
     Http().bindAndHandle(route, config.interface, config.port.value).foreach { binding ⇒
       sys.addShutdownHook {

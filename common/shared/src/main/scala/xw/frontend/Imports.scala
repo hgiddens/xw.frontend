@@ -2,6 +2,7 @@ package xw.frontend
 
 import scala.collection.immutable
 
+// TODO: this is not worth the pain
 trait Imports {
   // Primitives
   final type Any = scala.Any
@@ -40,4 +41,7 @@ trait Imports {
   // TODO: Vector?
   final type Seq[A] = immutable.Seq[A]
   final val Seq: immutable.Seq.type = immutable.Seq
+
+  final type Vector[A] = immutable.Vector[A]
+  final val Vector: immutable.Vector.type = immutable.Vector
 }

@@ -2,11 +2,16 @@ package xw.frontend
 package server
 
 import java.io.{ByteArrayInputStream, InputStream}
+import java.util.UUID
 import java.util.zip.GZIPInputStream
+
 import scala.io.Source
 import scala.util.Try
 
 object TestUtils {
+
+  def asUUID(value: String): Option[UUID] =
+    Try(UUID.fromString(value)).toOption
 
   /** The string representation of the resource a the given path. */
   def resourceContent(path: String): Option[String] =

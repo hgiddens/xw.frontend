@@ -27,6 +27,13 @@ it's not fun. Particular choices that I'm thinking of:
 The other thing is it'd be nice to have a reasonable playground to experiment
 with all the cool new FOTM stuff.
 
+## Model
+
+### Documents
+
+The server exposes a set of documents; a document is basically a crossword. See
+ the classes in the `xw.frontend.server.documents` package.
+
 ## Development
 
 [SBT](https://www.scala-sbt.org) is used as the build tool. To quickly spin up
