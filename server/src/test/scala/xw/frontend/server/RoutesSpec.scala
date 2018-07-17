@@ -3,8 +3,8 @@ package server
 
 import java.util.UUID
 
-import akka.http.scaladsl.model.{MediaTypes, StatusCodes}
-import akka.http.scaladsl.model.headers.{`Accept-Encoding`, `Content-Encoding`}
+import akka.http.scaladsl.model.{MediaTypes, StatusCodes, Uri}
+import akka.http.scaladsl.model.headers.{Location, `Accept-Encoding`, `Content-Encoding`}
 import akka.http.scaladsl.model.headers.HttpEncodings.{gzip, identity}
 import akka.http.scaladsl.testkit.Specs2RouteTest
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport.jsonUnmarshaller
@@ -15,7 +15,7 @@ import org.specs2.specification.Scope
 
 import xw.frontend.resources.config.ResourceConfig
 import xw.frontend.server.TestUtils.{asUUID, gunzipToString, resourceContent}
-import xw.frontend.server.documents.VarDocumentStore
+import xw.frontend.server.documents.{VarDocumentStore, VarDocumentStoreWithDocument}
 
 // TODO: can no longer run these tests from IDEA
 object RoutesSpec extends Specification with ScalaCheck with Specs2RouteTest {
@@ -78,6 +78,27 @@ object RoutesSpec extends Specification with ScalaCheck with Specs2RouteTest {
       }
     }
 
+    "getting a specific document" should {
+      "find the document when it's present" in prop { input: VarDocumentStoreWithDocument ⇒
+        val id = input.document.id
+        Get(s"/documents/$id") ~> Routes.documents(input.store) ~> check {
+          val documentId = responseAs[Json].hcursor.get[UUID]("id")
+
+          status must_=== StatusCodes.OK
+          mediaType must_=== MediaTypes.`application/json`
+          documentId must beRight.which(_ must_=== id)
+        }
+      }
+
+      "404 when it's not present" in prop { (store: VarDocumentStore, id: UUID) ⇒
+        !store.documents.exists(_.id == id) ==> {
+          Get(s"/documents/$id") ~> Routes.documents(store) ~> check {
+            status must_=== StatusCodes.NotFound
+          }
+        }
+      }
+    }
+
     "creating a new document" should {
       "add a new document in the document store" in prop { store: VarDocumentStore ⇒
         val initialDocuments = store.documents
@@ -88,16 +109,16 @@ object RoutesSpec extends Specification with ScalaCheck with Specs2RouteTest {
         }
       }
 
-      "return the created document" in prop { store: VarDocumentStore ⇒
+      "return the location of the created document" in prop { store: VarDocumentStore ⇒
         val initialDocuments = store.documents
         Post("/documents") ~> Routes.documents(store) ~> check {
-          val added = store.documents.diff(initialDocuments).head
-          val returnedId = responseAs[Json].hcursor.get[UUID]("id")
+          val addedId = store.documents.diff(initialDocuments).head.id
+          val expectedUri = Uri(s"/documents/$addedId")
 
-          // TODO: this should be StatusCodes.Created and include a location header
-          status must_=== StatusCodes.OK
-          mediaType must_=== MediaTypes.`application/json`
-          returnedId must beRight(added.id)
+          status must_=== StatusCodes.Created
+          header[Location] must beSome.which { location ⇒
+            location.uri must_=== expectedUri
+          }
         }
       }
     }

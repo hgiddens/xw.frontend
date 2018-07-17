@@ -28,3 +28,17 @@ object VarDocumentStore {
       } yield new VarDocumentStore(documents.toVector)
     }
 }
+
+/** A VarDocumentStore and a Document that's in the store. */
+final case class VarDocumentStoreWithDocument(store: DocumentStore, document: Document)
+object VarDocumentStoreWithDocument {
+  implicit def arbitrary: Arbitrary[VarDocumentStoreWithDocument] =
+    Arbitrary {
+      for {
+        store ← Arbitrary.arbitrary[VarDocumentStore]
+        documents = store.documents
+        if documents.nonEmpty
+        document ← Gen.oneOf(documents)
+      } yield apply(store, document)
+    }
+}

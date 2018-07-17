@@ -3,8 +3,9 @@ package server
 
 import java.util.UUID
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.headers.EntityTag
+import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.headers.{EntityTag, Location}
 import akka.http.scaladsl.model.headers.HttpEncodings.gzip
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
@@ -24,8 +25,9 @@ object Routes {
 
   /** Routes for the document API. */
   // TODO: API documentation
-  private[server] def documents(documentStore: DocumentStore): Route =
-    path("documents") {
+  private[server] def documents(documentStore: DocumentStore): Route = {
+    val root = "documents"
+    path(root) {
       get {
         complete(documentStore.documents)
       } ~ post {
@@ -35,10 +37,20 @@ object Routes {
         val uuid = UUID.randomUUID()
         val document = Document(uuid)
         val succeeded = documentStore.addDocument(document)
-        if (succeeded) complete(document)
-        else complete(StatusCodes.Conflict)
+        if (!succeeded) complete(StatusCodes.Conflict)
+        else {
+          val uri = Uri(path = Path / root / uuid.toString)
+          respondWithHeader(Location(uri)) {
+            complete(StatusCodes.Created)
+          }
+        }
       }
+    } ~ path(root / JavaUUID) { id ⇒
+      documentStore.documents
+        .find(_.id == id)
+        .fold(complete(StatusCodes.NotFound))(complete(_))
     }
+  }
 
   /** Routes for static content. */
   private[server] def static(config: ResourceConfig): Route =
