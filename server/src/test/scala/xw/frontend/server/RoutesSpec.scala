@@ -91,8 +91,8 @@ object RoutesSpec extends Specification with ScalaCheck with Specs2RouteTest {
       "return the created document" in prop { store: VarDocumentStore ⇒
         val initialDocuments = store.documents
         Post("/documents") ~> Routes.documents(store) ~> check {
-          def added = store.documents.diff(initialDocuments).head
-          def returnedId = responseAs[Json].hcursor.get[UUID]("id")
+          val added = store.documents.diff(initialDocuments).head
+          val returnedId = responseAs[Json].hcursor.get[UUID]("id")
 
           // TODO: this should be StatusCodes.Created and include a location header
           status must_=== StatusCodes.OK
