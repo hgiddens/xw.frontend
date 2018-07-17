@@ -8,6 +8,7 @@ import scala.sys
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import cats.Id
 import eu.timepit.refined.W
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Interval
@@ -36,9 +37,9 @@ object Server {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-    object documentStore extends DocumentStore {
+    object documentStore extends DocumentStore[Id] {
       def documents: Vector[Document] = Vector.empty
-      def addDocument(document: Document): Boolean = false
+      def addDocument(document: Document): Unit = ()
     }
 
     val route = Routes

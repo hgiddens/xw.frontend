@@ -1,22 +1,22 @@
 package xw.frontend
 package server.documents
 
+import cats.Id
 import org.scalacheck.{Arbitrary, Gen}
 
 import xw.frontend.server.documents.Generators._
 
 /** A document store implemented by a synchronised var. */
 // TODO: thread-safe + tests
+// TODO: not ID
 final class VarDocumentStore private (private[this] var docs: Vector[Document])
-    extends DocumentStore {
+    extends DocumentStore[Id] {
 
   def documents: Vector[Document] = docs
 
-  def addDocument(document: Document): Boolean =
-    if (docs.exists(_.id == document.id)) false
-    else {
+  def addDocument(document: Document): Unit =
+    if (!docs.exists(_.id == document.id)) {
       docs = docs :+ document
-      true
     }
 }
 object VarDocumentStore {
@@ -30,7 +30,7 @@ object VarDocumentStore {
 }
 
 /** A VarDocumentStore and a Document that's in the store. */
-final case class VarDocumentStoreWithDocument(store: DocumentStore, document: Document)
+final case class VarDocumentStoreWithDocument(store: VarDocumentStore, document: Document)
 object VarDocumentStoreWithDocument {
   implicit def arbitrary: Arbitrary[VarDocumentStoreWithDocument] =
     Arbitrary {

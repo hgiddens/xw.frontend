@@ -10,6 +10,8 @@ import akka.http.scaladsl.model.headers.HttpEncodings.gzip
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.ContentTypeResolver.Default
+import cats.Functor
+import cats.implicits._
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 
 import xw.frontend.resources.html
@@ -18,37 +20,38 @@ import xw.frontend.server.Marshalling._
 import xw.frontend.server.documents.{Document, DocumentStore}
 
 object Routes {
-  def root(config: ResourceConfig, documentStore: DocumentStore): Route =
+  def root[F[_]: Functor: MarshallingM](
+      config: ResourceConfig,
+      documentStore: DocumentStore[F]
+  ): Route =
     (get & pathEndOrSingleSlash) {
       complete(html.index(config))
     } ~ static(config) ~ documents(documentStore)
 
   /** Routes for the document API. */
   // TODO: API documentation
-  private[server] def documents(documentStore: DocumentStore): Route = {
+  private[server] def documents[F[_]: Functor: MarshallingM](
+      documentStore: DocumentStore[F]
+  ): Route = {
     val root = "documents"
     path(root) {
       get {
         complete(documentStore.documents)
       } ~ post {
-        // TODO: it's almost impossible to test the conflict thing
-        // at least, with any sort of reasonable implementation; this indicates that straight up
-        // returning unit is probably the way to go – I do want to read up on this tho
-        val uuid = UUID.randomUUID()
-        val document = Document(uuid)
-        val succeeded = documentStore.addDocument(document)
-        if (!succeeded) complete(StatusCodes.Conflict)
-        else {
-          val uri = Uri(path = Path / root / uuid.toString)
-          respondWithHeader(Location(uri)) {
-            complete(StatusCodes.Created)
-          }
+        val id = UUID.randomUUID()
+        val document = Document(id)
+        documentStore.addDocument(document)
+        val uri = Uri(path = Path / root / id.toString)
+        respondWithHeader(Location(uri)) {
+          complete(StatusCodes.Created)
         }
       }
     } ~ path(root / JavaUUID) { id ⇒
-      documentStore.documents
-        .find(_.id == id)
-        .fold(complete(StatusCodes.NotFound))(complete(_))
+      complete {
+        for {
+          docs ← documentStore.documents
+        } yield docs.find(_.id == id).toRight(StatusCodes.NotFound)
+      }
     }
   }
 
