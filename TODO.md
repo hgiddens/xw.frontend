@@ -1,5 +1,6 @@
 # TODO
 
+- when I run `server/test` it tries to run ScalaTest tests and complains none were found – wtf?
 - favicon
 - authentication
 - digest digests too much – stop it eating source maps somehow?
