@@ -36,8 +36,9 @@ object Server {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-    val documentStore = new DocumentStore {
+    object documentStore extends DocumentStore {
       def documents: Vector[Document] = Vector.empty
+      def addDocument(document: Document): Boolean = false
     }
 
     val route = Routes

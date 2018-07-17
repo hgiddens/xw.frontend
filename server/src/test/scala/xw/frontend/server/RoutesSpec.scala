@@ -1,6 +1,8 @@
 package xw.frontend
 package server
 
+import java.util.UUID
+
 import akka.http.scaladsl.model.{MediaTypes, StatusCodes}
 import akka.http.scaladsl.model.headers.{`Accept-Encoding`, `Content-Encoding`}
 import akka.http.scaladsl.model.headers.HttpEncodings.{gzip, identity}
@@ -72,6 +74,30 @@ object RoutesSpec extends Specification with ScalaCheck with Specs2RouteTest {
           status must_=== StatusCodes.OK
           mediaType must_=== MediaTypes.`application/json`
           ids must_=== store.documents.map(_.id)
+        }
+      }
+    }
+
+    "creating a new document" should {
+      "add a new document in the document store" in prop { store: VarDocumentStore ⇒
+        val initialDocuments = store.documents
+        Post("/documents") ~> Routes.documents(store) ~> check {
+          val updatedDocuments = store.documents
+          val added = updatedDocuments.diff(initialDocuments)
+          added must haveSize(1)
+        }
+      }
+
+      "return the created document" in prop { store: VarDocumentStore ⇒
+        val initialDocuments = store.documents
+        Post("/documents") ~> Routes.documents(store) ~> check {
+          def added = store.documents.diff(initialDocuments).head
+          def returnedId = responseAs[Json].hcursor.get[UUID]("id")
+
+          // TODO: this should be StatusCodes.Created and include a location header
+          status must_=== StatusCodes.OK
+          mediaType must_=== MediaTypes.`application/json`
+          returnedId must beRight(added.id)
         }
       }
     }

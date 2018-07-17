@@ -75,9 +75,11 @@ def compilerFlags: Seq[Setting[_]] = {
   )
 }
 
+// TODO: It's time to reify the dependencies
 ThisBuild / dependencyOverrides ++= Seq(
   // circe-core 0.9.3 depends on cats-core 1.0.1
   "org.typelevel" %% "cats-core" % "1.1.0",
+  "org.typelevel" %% "cats-kernel" % "1.1.0",
 )
 
 disablePlugins(RevolverPlugin)
@@ -162,6 +164,7 @@ lazy val server = project.
       "de.heikoseeberger" %% "akka-http-circe" % "1.21.0",
       "eu.timepit" %% "refined" % "0.9.0",
       "eu.timepit" %% "refined-pureconfig" % "0.9.0",
+      "io.circe" %% "circe-testing" % "0.9.3",
       "org.log4s" %% "log4s" % "1.6.1",
       "org.specs2" %% "specs2-core" % "4.2.0" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.2.0" % Test,

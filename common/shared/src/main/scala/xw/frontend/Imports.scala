@@ -38,6 +38,9 @@ trait Imports {
   final val Some: scala.Some.type = scala.Some
   final val None: scala.None.type = scala.None
 
+  final type Set[A] = immutable.Set[A]
+  final val Set: immutable.Set.type = immutable.Set
+
   // TODO: Vector?
   final type Seq[A] = immutable.Seq[A]
   final val Seq: immutable.Seq.type = immutable.Seq
