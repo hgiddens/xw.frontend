@@ -1,5 +1,6 @@
 # TODO
 
+- can I make Scalafmt enforce my import spacing fetishes?
 - when I run `server/test` it tries to run ScalaTest tests and complains none were found – wtf?
 - favicon
 - authentication
